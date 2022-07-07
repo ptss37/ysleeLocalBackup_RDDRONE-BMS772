@@ -59,7 +59,7 @@
  * Defines
  ****************************************************************************/
 #define BMS_VERSION_STRING "bms3.6-10.0"
-//#define DONT_DO_UAVCAN
+#define DONT_DO_UAVCAN //<YS>
 
 //! this macro is used to print a byte value to binary, use as variable to BYTE_TO_BINARY_PATTERN
 #ifndef BYTE_TO_BINARY
@@ -2724,7 +2724,7 @@ void BCCFaultPinISR(int number)
  */
 void ButtonPinISR(int number)
 {
-	//cli_printf("button: %d\n", gpio_readPin(number));
+	cli_printf("button: %d\n", gpio_readPin(number));
 	// check which transaction
 	if(gpio_readPin(SBC_WAKE))
 	{
