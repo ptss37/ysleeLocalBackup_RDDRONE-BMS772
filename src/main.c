@@ -42,6 +42,7 @@
 #include <sched.h>
 #include <semaphore.h>
 #include <math.h>
+#include <signal.h>
 
 #include "data.h"
 #include "cli.h"
@@ -59,7 +60,7 @@
  * Defines
  ****************************************************************************/
 #define BMS_VERSION_STRING "bms3.6-10.0"
-//#define DONT_DO_UAVCAN
+#define DONT_DO_UAVCAN
 
 //! this macro is used to print a byte value to binary, use as variable to BYTE_TO_BINARY_PATTERN
 #ifndef BYTE_TO_BINARY
@@ -116,6 +117,8 @@ static const char *gStatesArray[] =
  * private data
  ****************************************************************************/
 // make a mutex lock for the main state 
+int gMyTID; // <YS> 
+
 pthread_mutex_t gStateLock;
 bool gStateLockInitialized = false;
 
@@ -289,6 +292,8 @@ stateCommands_t setNGetStateCommandVariable(bool setNotGet, stateCommands_t newV
  * @return 	0 if ok
  */
 int getOcvPeriodTime(int32_t *newTime, states_t oldState);
+// <YS>
+void siguser_action(int signo, siginfo_t *siginfo, void *arg);
 /****************************************************************************
  * main
  ****************************************************************************/
@@ -497,6 +502,7 @@ int bms_main(int argc, char *argv[])
 			cli_printfError("main ERROR: Failed to start main loop task: %d\n", errcode);
 			return 0;
 		}
+		gMyTID = lvRetValue; //<YS>
 	}
 
 	// return
@@ -530,6 +536,23 @@ static int mainTaskFunc(int argc, char *argv[])
 	bool firstTimeStartup = true;
 	bool cellUnderVoltageDetected = false;
 
+	// <YS>
+ 	struct sigaction act;
+
+	memset(&act, 0, sizeof(struct sigaction));
+	act.sa_sigaction = siguser_action;
+  	act.sa_flags     = SA_SIGINFO;
+
+	sigemptyset(&act.sa_mask);
+
+	lvRetValue = sigaction(SIGALRM, &act, NULL);
+  	if (lvRetValue != 0)
+    {
+      cli_printf("<YS> mainTask : Failed to install SIGALRM handler\n");
+    }
+	// <YS>
+
+	
 	// get the variables if the fault happend
 	gBCCRisingFlank = gpio_readPin(BCC_FAULT);
 
@@ -578,7 +601,8 @@ static int mainTaskFunc(int argc, char *argv[])
 
 	// loop in the state machine
 	while(1)
-	{
+	{	
+
 		// check if the pin is high and the variable is not high
 		if((getMainState() != FAULT) && (getMainState() != INIT) && (getMainState() != CHARGE) &&
 		  (getMainState() != DEEP_SLEEP) && (!gBCCRisingFlank) && (gpio_readPin(BCC_FAULT)))
@@ -2689,6 +2713,7 @@ void newMeasurementsFunction(void)
 	int error = 0;
 
 	//cli_printf("Sending over CAN!\n");
+
 #ifndef DONT_DO_UAVCAN
 	// send data over UAVCAN
 	error = uavcan_sendBMSStatus();
@@ -3159,4 +3184,10 @@ int getOcvPeriodTime(int32_t *newTime, states_t oldState)
     // succesfull
     lvRetValue = 0;
     return lvRetValue;
+}
+//<YS>
+void siguser_action(int signo, siginfo_t *siginfo, void *arg)
+{
+  printf("<YS> mainTask : siguser_action() : Received signo=%d siginfo=%p arg=%p\n",
+         signo, siginfo, arg);
 }

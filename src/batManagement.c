@@ -103,6 +103,8 @@
  ****************************************************************************/
 // the callback functions
 /*! @brief  callback function to report there is an overcurrent */
+extern int gMyTID;
+
 overCurrentCallbackFunction 			g_overCurrentCallbackFunctionfp;
 
 /*! @brief  callback function to change the LED color */
