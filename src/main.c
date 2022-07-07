@@ -60,6 +60,7 @@
  ****************************************************************************/
 #define BMS_VERSION_STRING "bms3.6-10.0"
 //#define DONT_DO_UAVCAN
+#define DONT_DO_UAVCAN //<ys>
 
 //! this macro is used to print a byte value to binary, use as variable to BYTE_TO_BINARY_PATTERN
 #ifndef BYTE_TO_BINARY
@@ -81,6 +82,7 @@
 
 #define DEFAULT_PRIORITY 	100
 #define DEFAULT_STACK_SIZE 	2048
+
 #define DATA_HANDLER_STACK_SIZE 1536 //2048 //1024
 
 #define CHANGED_DATA_ARRAY_ELEMENTS 20
@@ -488,8 +490,10 @@ int bms_main(int argc, char *argv[])
 
 		// create the main loop task
 		lvRetValue = task_create("mainLoop", DEFAULT_PRIORITY, DEFAULT_STACK_SIZE, mainTaskFunc, NULL);
+		cli_printf("<ys> mainLoop PID : %d\n", lvRetValue); // <ys>
 		if (lvRetValue < 0)
 		{
+			
 			// get the error
 			errcode = errno;
 

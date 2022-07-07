@@ -96,6 +96,37 @@ int nfc_initialize(void);
  */
 int nfc_setHPD(bool HPD);
 
+/*!
+ * @brief 	This function write Subakio URL formatted NDEF record to User memory in NTAG
+
+ */
+void nfc_myfunc1(void);
+
+/*!
+ * @brief   This function write 4byte NDEF record to User memory in NTAG
+ */
+void nfc_writeMemory(uint8_t adr1, uint8_t adr2, uint8_t *wrVal);
+
+/*!
+ * @brief   This function wait for NTAG to write EERPOM
+ */
+void nfc_waitEEPROM(void);
+
+/*!
+ * @brief   This function set bits in session register
+ */
+void nfc_writeRegister(uint8_t adr1, uint8_t adr2, uint8_t adrr, uint8_t mask, uint8_t data);
+
+/*!
+ * @brief   This function set NFC to pull ED pin low when field present
+ */
+void nfc_myinit1(void);
+
+/*!
+ * @brief   This function read a session register
+ */
+void nfc_readRegister(uint8_t adr1, uint8_t adr2, uint8_t adrr, uint8_t* data);
+
 /*******************************************************************************
  * EOF
  ******************************************************************************/
